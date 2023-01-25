@@ -29,6 +29,10 @@ MANIFEST
 .temp_1/
 temp_1/
 /temp_1
+.temp_2/
+temp_2/
+/temp_2
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
