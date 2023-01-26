@@ -60,3 +60,42 @@ http://127.0.0.1:8000/redoc/
 
 ----------------
 ver.1_11
+
+### доступны следующие URL:
+* http://127.0.0.1:8000/api/tag/
+    * Tag List
+    * PAGINATION
+        * DEFAULT_PAGINATION_CLASS
+        * PageNumberPagination
+        * PAGE_SIZE: 10
+    * PERMISSION, RESPONSE SCHEMA: the same -> Tag Instance
+    * Allow: GET, POST
+    * unique fields: slug
+    * ordering: id
+
+* http://127.0.0.1:8000/api/tag/3/
+    * Tag Instance
+    * PERMISSION: 
+        * IsAuthenticated
+        * DEFAULT_PERMISSION_CLASSES
+    * Allow: GET, PUT, PATCH, DELETE
+    * RESPONSE SCHEMA: application/json
+```
+id	
+integer
+
+name	
+string <= 200 characters
+Название
+
+color	
+string or null <= 7 characters
+Цвет в HEX
+
+slug	
+string or null <= 200 characters ^[-a-zA-Z0-9_]+$
+Уникальный слаг
+```
+
+----------------
+ver.1_12
