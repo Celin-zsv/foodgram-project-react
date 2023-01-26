@@ -7,14 +7,14 @@ User = get_user_model()
 
 
 def validate_cooking_time(value):
-    if not 1 <= value:
+    if value < 1:
         raise ValidationError(
             'Проверьте время приготовления:'
             ' значение должно быть больше или равно 1')
 
 
 def validate_amount(value):
-    if not 1 <= value:
+    if value < 1:
         raise ValidationError(
             'Проверьте сумму: значение должно быть больше или равно 1')
 
@@ -34,9 +34,16 @@ class Tag(models.Model):
     name = models.CharField(
         'Наименование', max_length=200, db_index=True, null=False)
     color = models.CharField('Цвет в HEX', max_length=7, null=False)
+    slug = models.SlugField('Уникальный слаг', max_length=200, null=True)
 
     def __str__(self) -> str:
         return self.name
+
+    class Meta:
+        ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slug'], name='unique_tag')]
 
 
 class Recipe(models.Model):
