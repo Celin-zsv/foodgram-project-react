@@ -56,3 +56,7 @@ http://127.0.0.1:8000/redoc/
     * Reset username	post	{    "email": ""}
 * http://127.0.0.1:8000/api/users/reset_username_confirm/
     * Reset username confirm	post	{    "new_username": ""}
+
+
+----------------
+ver.1_11
