@@ -34,7 +34,7 @@ class Tag(models.Model):
     name = models.CharField(
         'Наименование', max_length=200, db_index=True, null=False)
     color = models.CharField('Цвет в HEX', max_length=7, null=False)
-    slug = models.SlugField('Уникальный слаг', max_length=200, null=True)
+    slug = models.SlugField('Слаг', max_length=200, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -43,7 +43,7 @@ class Tag(models.Model):
         ordering = ['id']
         constraints = [
             models.UniqueConstraint(
-                fields=['slug'], name='unique_tag')]
+                fields=['slug'], name='unique_slug')]
 
 
 class Recipe(models.Model):
