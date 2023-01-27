@@ -99,3 +99,39 @@ string or null <= 200 characters ^[-a-zA-Z0-9_]+$
 
 ----------------
 ver.1_12
+
+### доступны следующие URL:
+* http://127.0.0.1:8000/api/ingredient/
+    * Ingredient List
+    * PAGINATION
+        * DEFAULT_PAGINATION_CLASS
+        * PageNumberPagination
+        * PAGE_SIZE: 10
+    * PERMISSION, RESPONSE SCHEMA: the same -> Ingredient Instance
+    * Allow: GET, POST
+    * Поиск по частичному вхождению в начале названия ингредиента
+        * РЕЗУЛЬТАТ поиска по:
+            * http://127.0.0.1:8000/api/ingredient/?search=К
+			* вернет ингредиент: name='Капуста' 
+			* вернет ингредиент: по <начальному символу /начальным символам>
+            * "при использовании базы данных sqlite поиск нечувствителен к регистру только при запросах на латинице"
+
+* http://127.0.0.1:8000/api/ingredient/4/
+    * Ingredient Instance
+    * PERMISSION: 
+        * IsAuthenticated
+        * DEFAULT_PERMISSION_CLASSES
+    * Allow: GET, PUT, PATCH, DELETE
+    * RESPONSE SCHEMA: application/json
+```
+id	
+integer
+
+name
+string <= 200 characters
+
+measurement_unit
+string <= 200 characters
+```
+----------------
+ver.1_13
