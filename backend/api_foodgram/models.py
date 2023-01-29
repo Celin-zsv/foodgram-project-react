@@ -16,7 +16,7 @@ def validate_cooking_time(value):
 def validate_amount(value):
     if value < 1:
         raise ValidationError(
-            'Проверьте сумму: значение должно быть больше или равно 1')
+            'Проверьте количество: значение должно быть больше или равно 1')
 
 
 class Ingredient(models.Model):
@@ -56,7 +56,7 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Автор'
     )
-    text = models.TextField('Описание', help_text='Введите описание рецепта'),
+    text = models.TextField('Описание', null=True)
     image = models.ImageField(
         upload_to='images/',
         null=True
@@ -79,18 +79,26 @@ class Recipe(models.Model):
 class IngredientRecipe(models.Model):
     ingredient_id = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.IntegerField(
+        'Количество в рецепте', validators=[validate_amount])
 
     def __str__(self) -> str:
-        return f'{self.ingredient}.{self.recipe}'
+        return f'{self.ingredient_id}.{self.recipe_id}.{self.amount}'
+
+    class Meta:
+        ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient_id', 'recipe_id'],
+                name='unique_ingredient_recipe')]
 
 
 class TagRecipe(models.Model):
     tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[validate_amount])
 
     def __str__(self) -> str:
-        return f'{self.tag_id}.{self.recipe_id}.{self.amount}'
+        return f'{self.tag_id}.{self.recipe_id}'
 
 
 class Favorite(models.Model):
