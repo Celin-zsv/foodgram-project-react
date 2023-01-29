@@ -8,9 +8,9 @@ app_name = 'api_foodgram'
 router = DefaultRouter()
 router.register('tag', views.TagViewSet)
 router.register('ingredient', views.IngredientViewSet)
+router.register('recipe', views.RecipeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
     path('zsv2/', views.zsv_page, name='zsv_page'),
-    # path('', views.get_token),
 ]
