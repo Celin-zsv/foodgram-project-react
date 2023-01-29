@@ -135,3 +135,94 @@ string <= 200 characters
 ```
 ----------------
 ver.1_13
+
+### доступны следующие URL:
+* http://127.0.0.1:8000/api/recipe/{id}/
+    * Recipe Instance
+    * PERMISSION: 
+        * IsAuthenticated
+        * DEFAULT_PERMISSION_CLASSES    
+    * Allow: GET, PUT, PATCH, DELETE,
+    * RESPONSE SCHEMA: application/json    
+```
+id	
+integer
+
+tags
+Array of objects (Tag)
+Список тегов
+
+in Array tags
+id	
+integer
+
+in Array tags
+name	
+string <= 200 characters
+Название
+
+in Array tags
+color	
+string or null <= 7 characters
+Цвет в HEX
+
+in Array tags
+slug	
+string or null <= 200 characters ^[-a-zA-Z0-9_]+$
+Слаг
+
+author
+object (User)
+Пользователь (В рецепте - автор рецепта)
+
+Array author : NO yet
+
+ingredients	
+Array of objects (IngredientInRecipe)
+Список ингредиентов
+
+in Array ingredients
+id	
+integer
+
+in Array ingredients
+name
+string <= 200 characters
+Название
+
+in Array ingredients
+measurement_unit
+string <= 200 characters
+Единицы измерения
+
+in Array ingredients
+amount	
+integer >= 1
+Количество
+
+is_favorited : NO yet
+boolean
+Находится ли в избранном
+
+is_in_shopping_cart : NO yet
+boolean
+Находится ли в корзине
+
+name
+string <= 200 characters
+Название
+
+image : NO yet
+string <url>
+Ссылка на картинку на сайте
+
+text
+string
+Описание
+
+cooking_time
+integer >= 1
+Время приготовления (в минутах)
+```
+----------------
+ver.1_14
