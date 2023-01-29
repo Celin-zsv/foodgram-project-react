@@ -1,8 +1,8 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework import viewsets
-from.serializers import TagSerializer, IngredientSerializer
-from .models import Tag, Ingredient
+from .serializers import (
+    TagSerializer, IngredientSerializer, RecipeSerializer)
+from .models import Tag, Ingredient, Recipe
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 
@@ -22,3 +22,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('^name',)
     # search_fields = ('$name',)
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
