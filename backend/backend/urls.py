@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 # from django.conf.urls import include, url
+from django.conf import settings  # FOR: обработка медиафайлов в режиме отладки
+from django.conf.urls.static import static  # FOR: обработка медиафайлов в режиме отладки
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,3 +37,8 @@ urlpatterns = [
     path('api/', include('djoser.urls')),  # Работа с пользователями
     path('api/auth/', include('djoser.urls.authtoken')),  # Работа с токенами
 ]
+
+# FOR: обработка медиафайлов в режиме отладки
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
