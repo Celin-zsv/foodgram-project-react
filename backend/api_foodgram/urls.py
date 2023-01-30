@@ -1,7 +1,6 @@
 from api_foodgram import views
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-# from .views import views
 
 app_name = 'api_foodgram'
 
@@ -9,6 +8,7 @@ router = DefaultRouter()
 router.register('tag', views.TagViewSet)
 router.register('ingredient', views.IngredientViewSet)
 router.register('recipe', views.RecipeViewSet)
+router.register('recipes', views.RecipesViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
