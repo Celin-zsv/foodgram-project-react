@@ -1,7 +1,9 @@
 from django.http import HttpResponse
 from rest_framework import viewsets
 from .serializers import (
-    TagSerializer, IngredientSerializer, RecipeSerializer, RecipesSerializer)
+    TagSerializer, IngredientSerializer, RecipesWriteSerializer,
+    RecipeReadSerializer
+    )
 from .models import Tag, Ingredient, Recipe
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -24,11 +26,11 @@ class IngredientViewSet(viewsets.ModelViewSet):
     # search_fields = ('$name',)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipesWriteViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipesWriteSerializer
 
 
-class RecipesViewSet(viewsets.ModelViewSet):
+class RecipeReadViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipesSerializer
+    serializer_class = RecipeReadSerializer
