@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from .models import Tag, Ingredient, Recipe, IngredientRecipe
 
@@ -10,44 +11,50 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Ingredient
-        # fields = ('id', 'name', 'measurement_unit',)
-        fields = ('id', 'name', 'measurement_unit', 'amount')
+        fields = ('id', 'name', 'measurement_unit',)
         # read_only_fields = ('id',)
 
-    def get_amount(self, obj):
-        return 1
 
-
-class Ingredient2Serializer(serializers.ModelSerializer):
-    amount = serializers.SerializerMethodField()
+class IngredientRecipeWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
 
     class Meta:
-        model = Ingredient
+        model = IngredientRecipe
+        fields = ('id', 'amount')
+
+
+class IngredientRecipeReadSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='ingredient_id')
+    measurement_unit = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount',)
 
-    def get_amount(self, obj):
-        res = IngredientRecipe.objects.filter(ingredient_id=obj.id)
-        return res[0].amount
+    def get_measurement_unit(self, obj):
+        return obj.ingredient_id.measurement_unit
+
+    def get_id(self, obj):
+        return obj.ingredient_id.id
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    ingredients = Ingredient2Serializer(read_only=True, many=True)
-    tags = TagSerializer(read_only=True, many=True)
+class RecipeReadSerializer(serializers.ModelSerializer):
+    ingredients = IngredientRecipeReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Recipe
         fields = (
-            'id', 'name', 'author', 'text',
-            'cooking_time', 'ingredients', 'tags',)
+            'id', 'tags', 'author',
+            'ingredients',  'name', 'text', 'cooking_time', )
 
 
-# post: add resepe
-class RecipesSerializer(serializers.ModelSerializer):
-    ingredients = IngredientSerializer(many=True)
+class RecipesWriteSerializer(serializers.ModelSerializer):
+    ingredients = serializers.CharField(source='ingredients_ref')
+    ingredients = IngredientRecipeWriteSerializer(many=True, required=True)
     tags = TagSerializer(read_only=True, many=True)
 
     class Meta:
@@ -57,117 +64,28 @@ class RecipesSerializer(serializers.ModelSerializer):
             'cooking_time', 'ingredients', 'tags',)
 
     def create(self, validated_data):
+        if len(self.initial_data['ingredients']) == 0:
+            raise serializers.ValidationError(
+                'Обязательный ввод инградиннта-> id')
+
         ingredients = validated_data.pop('ingredients')
-        print(f'ingredients_BEFORE:{ingredients} BEFORE!!')
-        var_context = self.context['request'].data
-        print(f'self.context:  {var_context}   BEFORE!!')
-        var_ini = self.initial_data['ingredients'][0]['amount']
-        print(f'initial_data:  {var_ini}   initial_data')
-
         recipe = Recipe.objects.create(**validated_data)
+        bulk_list = list()
         for ingredient in ingredients:
-            current_ingredient, status = Ingredient.objects.get_or_create(
-                **ingredient
+            bulk_list.append(
+                IngredientRecipe(
+                    recipe_id=recipe,
+                    ingredient_id=get_object_or_404(
+                        Ingredient, pk=ingredient['id']),
+                    amount=ingredient['amount']
+                )
             )
-            print(f'ingredient123:{ingredient} !!')
-            var_len = len(ingredient['name'])
-            print(f'LEN_ingredient123:{var_len} !!')
-            IngredientRecipe.objects.create(
-                ingredient_id=current_ingredient,
-                recipe_id=recipe,
-                # amount=validated_data.amount
-                # amount='448'
-                # amount=ingredient['name']
-                amount=var_len
-                # amount=status
-            )
-
+        IngredientRecipe.objects.bulk_create(bulk_list)
         return recipe
 
-
-# class IngredientRecipeSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = IngredientRecipe
-#         fields = ('id', 'ingredient_id', 'recipe_id', 'amount',)
-#         # fields = ('id', 'amount',)
-
-
-# # post: add resepe-2
-# class RecipesSerializer(serializers.ModelSerializer):
-#     ingredients = IngredientSerializer(many=True)
-#     tags = TagSerializer(read_only=True, many=True)
-
-#     class Meta:
-#         model = Recipe
-#         fields = (
-#             'id', 'name', 'author', 'text',
-#             'cooking_time', 'ingredients', 'tags',)
-
-#     def create(self, validated_data):
-#         print(f'validated_data_BEFORE:  {validated_data}  BEFORE!!')
-#         ingredients = validated_data.pop('ingredients')
-#         print(f'validated_data_AFTER:  {validated_data}  AFTER!!')
-#         print(f'ingredients_BEFORE-1:{ingredients} BEFORE-1!!')
-#         ingredients2 = dict(ingredients)
-#         print(f'ingredients2_BEFORE-2:{ingredients2} BEFORE-2!!')
-
-#         # var_context = self.context['request'].data
-#         # print(f'self.context:  {var_context}   BEFORE!!')
-
-#         recipe = Recipe.objects.create(**validated_data)
-#         for ingredient in ingredients:
-#             current_ingredient, status = Ingredient.objects.get_or_create(
-#                 **ingredient
-#             )
-#             # current_ingredient = Ingredient.objects.get(
-#             #     **ingredient
-#             # )
-#             print(f'current_ingredient:  {current_ingredient}  !!')
-#             # IngredientRecipe.objects.create(recipe_id=recipe, **ingredient)
-#             print(f'ingredient123:{ingredient} !!')
-#             var_len = len(ingredient['name'])
-#             print(f'LEN_ingredient123:{var_len} !!')
-#             IngredientRecipe.objects.create(
-#                 ingredient_id=current_ingredient,
-#                 recipe_id=recipe,
-#                 # amount=validated_data.amount
-#                 # amount='448'
-#                 # amount=ingredient['name']
-#                 amount=var_len
-#                 # amount=recipe.
-#             )
-
-#         return recipe
-
-
-# # post: add resepe-3
-# class RecipesSerializer(serializers.ModelSerializer):
-#     ingredients = IngredientSerializer(many=True)
-#     tags = TagSerializer(read_only=True, many=True)
-
-#     class Meta:
-#         model = Recipe
-#         fields = (
-#             'id', 'name', 'author', 'text',
-#             'cooking_time', 'ingredients', 'tags',)
-
-#     def create(self, validated_data):
-#         ingredients = validated_data.pop('ingredients')
-
-#         recipe = Recipe.objects.create(**validated_data)
-#         for ingredient in ingredients:
-#             current_ingredient, status = Ingredient.objects.get_or_create(
-#                 **ingredient
-#             )
-#             IngredientRecipe.objects.create(
-#                 ingredient_id=current_ingredient,
-#                 recipe_id=recipe,
-#                 # amount=validated_data.amount
-#                 # amount='448'
-#                 # amount=ingredient['name']
-#                 amount=55
-#                 # amount=status
-#             )
-
-#         return recipe
+    def to_representation(self, instance):
+        serializer = RecipeReadSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        )
+        return serializer.data
