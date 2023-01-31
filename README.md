@@ -226,3 +226,60 @@ integer >= 1
 ```
 ----------------
 ver.1_14
+
+### доступна ЗАПИСЬ данных-> URL:
+* POST http://127.0.0.1:8000/api/recipe/
+* check: 'Обязательный ввод инградиннта-> id'
+* Content-Type: application/json
+```
+{
+    "ingredients": [
+        {
+            "id": 8,    #  need to know id Ingedient
+            "amount": 11
+        },
+        {
+            "id": 9,    #  need to know id Ingedient
+            "amount": 22
+        },
+    ],
+    "tags": [
+        1,
+        2
+    ],
+    "name": "string",
+    "text": "string",
+    "cooking_time": 1
+}
+```
+### доступно ЧТЕНИЕ данных-> URL:
+* GET http://127.0.0.1:8000/api/recipe/
+* GET http://127.0.0.1:8000/api/recipe/{id}/
+* Content-Type: application/json
+```
+{
+    "id": 60,
+    "tags": [],
+    "author": null,
+    "ingredients": [
+        {
+            "id": 8,
+            "name": "Инградиент-1 from Postman",
+            "measurement_unit": "кг-1 from Postman",
+            "amount": 21
+        },
+        {
+            "id": 4,
+            "name": "Горчица",
+            "measurement_unit": "ложка",
+            "amount": 21
+        }
+    ],
+    "name": "Postman рецепт №12",
+    "text": "рецепт from zsv12",
+    "cooking_time": 172
+}
+
+```
+----------------
+ver.1_15
