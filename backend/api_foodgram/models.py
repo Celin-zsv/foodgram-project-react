@@ -1,22 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
 User = get_user_model()
-
-
-def validate_cooking_time(value):
-    if value < 1:
-        raise ValidationError(
-            'Проверьте время приготовления:'
-            ' значение должно быть больше или равно 1')
-
-
-def validate_amount(value):
-    if value < 1:
-        raise ValidationError(
-            'Проверьте количество: значение должно быть больше или равно 1')
 
 
 class Ingredient(models.Model):
@@ -63,7 +50,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         'Время приготовления (в минутах)',
-        validators=[validate_cooking_time]
+        validators=[MinValueValidator(1)]
     )
     ingredients_ref = models.ManyToManyField(
         Ingredient, through='IngredientRecipe', related_name='recipes',
@@ -82,7 +69,7 @@ class IngredientRecipe(models.Model):
     recipe_id = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='ingredients')
     amount = models.IntegerField(
-        'Количество в рецепте', validators=[validate_amount])
+        'Количество в рецепте', validators=[MinValueValidator(1)])
 
     def __str__(self) -> str:
         return f'{self.ingredient_id}.{self.recipe_id}.{self.amount}'
