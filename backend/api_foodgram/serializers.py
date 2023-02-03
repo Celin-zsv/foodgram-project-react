@@ -54,8 +54,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
     ingredients = serializers.CharField(source='ingredients_ref')
-    ingredients = IngredientRecipeWriteSerializer(many=True, required=True)
-    tags = TagSerializer(read_only=True, many=True)
+    ingredients = IngredientRecipeWriteSerializer(
+        many=True, required=True, allow_empty=False)
+    tags = TagSerializer(read_only=True, many=True, allow_empty=False)
 
     class Meta:
         model = Recipe
@@ -64,7 +65,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time', 'ingredients', 'tags',)
 
     def create(self, validated_data):
-        if len(self.initial_data['ingredients']) == 0:
+        if 'ingredients' not in self.initial_data:
             raise serializers.ValidationError(
                 'Обязательный ввод инградиннта-> id')
 
@@ -82,6 +83,44 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             )
         IngredientRecipe.objects.bulk_create(bulk_list)
         return recipe
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.text)
+        instance.id = validated_data.get('id', instance.id)
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            obj_for_del = IngredientRecipe.objects.filter(
+                recipe_id=instance.id)
+
+            bulk_list = list()
+            for ingredient in ingredients:
+                ingredientrecipe_exist = IngredientRecipe.objects.filter(
+                    recipe_id=instance.id,
+                    ingredient_id=ingredient['id']).exists()
+                if ingredientrecipe_exist:
+                    obj_for_del = obj_for_del.exclude(
+                        ingredient_id=ingredient['id'])
+                    obj_ingredientrecipe = IngredientRecipe.objects.get(
+                        recipe_id=instance.id, ingredient_id=ingredient['id'])
+                    obj_ingredientrecipe.amount = ingredient['amount']
+                    obj_ingredientrecipe.save()
+                elif not ingredientrecipe_exist:
+                    bulk_list.append(
+                        IngredientRecipe(
+                            recipe_id=instance,
+                            ingredient_id=get_object_or_404(
+                                Ingredient, pk=ingredient['id']),
+                            amount=ingredient['amount']
+                        )
+                    )
+
+            obj_for_del.delete()
+            IngredientRecipe.objects.bulk_create(bulk_list)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         serializer = RecipeReadSerializer(
