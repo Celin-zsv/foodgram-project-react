@@ -28,9 +28,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipesWriteViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipesWriteSerializer
 
-
-class RecipeReadViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeReadSerializer
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return RecipesWriteSerializer
+        return RecipeReadSerializer
