@@ -298,3 +298,14 @@ ver.1_15
 
 ----------------
 ver.1_16
+
+### добавлено:
+* приложение users
+    * пользовательская model User(AbstractUser) 
+* ссылки на app users
+    * Recipe.author
+    * Favorite.user
+    * Shopping.user
+
+----------------
+ver.1_17
