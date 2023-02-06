@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+# from api_foodgram.serializers import CustomUserSerializer
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     # 'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'djoser',
+    'users',
     'api_foodgram',
 ]
 
@@ -88,6 +90,27 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'users.User'
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',  # использовать 'email' вместо 'username': для авторизации
+    'HIDE_USERS': False,  # accessing /users/<id>/ endpoints by user without proper permission will result ACCESS (not err)
+    'SERIALIZERS': {
+        'current_user': 'api_foodgram.serializers.CustomUserSerializer',
+        'user_create': 'api_foodgram.serializers.CustomCreateUserSerializer',
+        'user': 'api_foodgram.serializers.CustomUserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'set_username': ['rest_framework.permissions.IsAdminUser'],
+        'user_delete': ['rest_framework.permissions.IsAdminUser'],
+        'password_reset': ['rest_framework.permissions.IsAdminUser'],
+        'password_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
+        'username_reset': ['rest_framework.permissions.IsAdminUser'],
+        'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
