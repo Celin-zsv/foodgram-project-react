@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
-# from django.conf.urls import include, url
 from django.conf import settings  # FOR: обработка медиафайлов в режиме отладки
 from django.conf.urls.static import static  # FOR: обработка медиафайлов в режиме отладки
 
@@ -32,10 +31,8 @@ urlpatterns = [
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')),
-    # url(r'^auth/', include('djoser.urls')),
-    # url(r'^auth/', include('djoser.urls.authtoken')),
-    path('api/', include('djoser.urls')),  # Работа с пользователями
-    path('api/auth/', include('djoser.urls.authtoken')),  # Работа с токенами
+    # path('api/', include('djoser.urls')),  # Работа с пользователями
+    # path('api/auth/', include('djoser.urls.authtoken')),  # Работа с токенами
 ]
 
 # FOR: обработка медиафайлов в режиме отладки
