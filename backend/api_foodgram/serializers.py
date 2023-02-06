@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from .models import Tag, Ingredient, Recipe, IngredientRecipe
+from .models import Tag, Ingredient, Recipe, IngredientRecipe, Shopping
+from users.models import User
+from djoser.serializers import UserSerializer, UserCreateSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -65,10 +67,6 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time', 'ingredients', 'tags',)
 
     def create(self, validated_data):
-        if 'ingredients' not in self.initial_data:
-            raise serializers.ValidationError(
-                'Обязательный ввод инградиннта-> id')
-
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
         bulk_list = list()
@@ -128,3 +126,22 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         )
         return serializer.data
+
+
+class CustomUserSerializer(UserSerializer):
+    # 'is_subscribed' -> сделать расчетное поле, через вызов метода: ПОСЛЕ реализации подписки
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'email', 'id', 'username', 'first_name', 'last_name',
+            'password',)
+
+
+class CustomCreateUserSerializer(UserCreateSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'email', 'id', 'username', 'first_name', 'last_name',
+            'password')
