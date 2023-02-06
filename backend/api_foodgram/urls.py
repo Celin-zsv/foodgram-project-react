@@ -9,6 +9,9 @@ router.register('tag', views.TagViewSet)
 router.register('ingredient', views.IngredientViewSet)
 router.register('recipes', views.RecipesWriteViewSet)
 router.register('users', views.CustomUserViewSet)  # Работа с пользователями
+router.register(
+    r'recipes/(?P<recipe_id>\d+)/favorite',
+    views.FavoriteViewSet, basename='favorites')
 
 urlpatterns = [
     path('', include(router.urls)),
