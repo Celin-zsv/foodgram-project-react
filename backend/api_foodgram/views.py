@@ -2,11 +2,15 @@ from django.http import HttpResponse
 from rest_framework import viewsets
 from .serializers import (
     TagSerializer, IngredientSerializer, RecipesWriteSerializer,
-    RecipeReadSerializer
+    RecipeReadSerializer,
+    CustomUserSerializer,
+    CustomCreateUserSerializer
     )
 from .models import Tag, Ingredient, Recipe
+from users.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+from djoser.views import UserViewSet
 
 
 def zsv_page(request):
@@ -33,3 +37,8 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
         if self.request.method in ('POST', 'PATCH'):
             return RecipesWriteSerializer
         return RecipeReadSerializer
+
+
+class CustomUserViewSet(UserViewSet):  # см. по ссылке функционал
+# class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
