@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from .models import Tag, Ingredient, Recipe, IngredientRecipe, Shopping
+from .models import (
+    Tag, Ingredient, Recipe, IngredientRecipe, Favorite)
 from users.models import User
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
@@ -145,3 +146,27 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         fields = (
             'id', 'email', 'id', 'username', 'first_name', 'last_name',
             'password')
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    # image = serializers.SerializerMethodField()
+    cooking_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Favorite
+        # fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'cooking_time')
+
+    def get_name(self, obj):
+        return obj.recipe_id.name
+
+    # def get_image(self, obj):
+    #     return obj.recipe_id.image
+
+    def get_cooking_time(self, obj):
+        return obj.recipe_id.cooking_time
+
+    def create(self, validated_data):
+        favorite = Favorite.objects.create(**validated_data)
+        return favorite
