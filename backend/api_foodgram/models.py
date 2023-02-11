@@ -42,8 +42,9 @@ class Recipe(models.Model):
     )
     text = models.TextField('Описание', null=True)
     image = models.ImageField(
-        upload_to='images/',
-        null=True
+        upload_to='recipes/images/',
+        null=True,
+        default=None
     )
     cooking_time = models.IntegerField(
         'Время приготовления (в минутах)',
@@ -96,6 +97,14 @@ class Favorite(models.Model):
     def __str__(self) -> str:
         return f'{self.recipe_id}.{self.user}'
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe_id', 'user'],
+                name='unique_recipe_user'
+            )
+        ]
+
 
 class Shopping(models.Model):
     recipe_id = models.ForeignKey(
@@ -105,3 +114,21 @@ class Shopping(models.Model):
 
     def __str__(self) -> str:
         return f'{self.recipe_id}.{self.user}'
+
+
+class Subscription(models.Model):
+    following_id = models.ForeignKey(  # на кого подписываются
+        User, on_delete=models.CASCADE, related_name='subscriptions_following')
+    user = models.ForeignKey(  # кто подписывается
+        User, on_delete=models.CASCADE, related_name='subscriptions')
+
+    def __str__(self) -> str:
+        return f'{self.user}. {self.following_id}'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['following_id', 'user'],
+                name='unique_following_user'
+            )
+        ]
