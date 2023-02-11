@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from .models import (
-    Tag, Ingredient, Recipe, IngredientRecipe, Favorite, TagRecipe)
+    Tag, Ingredient, Recipe, IngredientRecipe, Favorite, TagRecipe,
+    Subscription)
 from users.models import User
 from djoser.serializers import UserSerializer, UserCreateSerializer
 import base64
@@ -72,10 +73,26 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
+class AuthorForRecipeSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'is_subscribed',)
+
+    def get_is_subscribed(self, obj):
+        return Subscription.objects.filter(
+            user=self.context['request'].user,
+            following_id=obj.id).exists()
+
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeReadSerializer(many=True, read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
     tags = TagSerializer(many=True, read_only=True)
+    author = AuthorForRecipeSerializer(many=False, read_only=True)
 
     class Meta:
         model = Recipe
@@ -204,6 +221,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
 class RecipeReadShortSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeWriteSerializer(many=True, read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
+    author = AuthorForRecipeSerializer(many=False, read_only=True)
 
     class Meta:
         model = Recipe
