@@ -56,9 +56,13 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, through='TagRecipe', related_name='recipes',
         verbose_name='Список тегов')
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     def __str__(self) -> str:
         return self.name
+
+    class Meta:
+        ordering = ['-pub_date']
 
 
 class IngredientRecipe(models.Model):
