@@ -41,7 +41,3 @@ class User(AbstractUser):
         default='user',
         verbose_name='Уровень доступа'
     )
-    is_subscribed = models.BooleanField(
-        default=False,
-        verbose_name='Подписан на пользователя'
-    )
