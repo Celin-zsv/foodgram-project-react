@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'users',
-    'api_foodgram',
+    # 'api_foodgram',
+    'recipes',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -96,9 +98,9 @@ DJOSER = {
     'LOGIN_FIELD': 'email',  # использовать 'email' вместо 'username': для авторизации
     'HIDE_USERS': False,  # accessing /users/<id>/ endpoints by user without proper permission will result ACCESS (not err)
     'SERIALIZERS': {
-        'current_user': 'api_foodgram.serializers.CustomUserSerializer',
-        'user_create': 'api_foodgram.serializers.CustomCreateUserSerializer',
-        'user': 'api_foodgram.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
+        # 'user_create': 'api.serializers.CustomCreateUserSerializer', # НЕ ТРЕБУЕТСЯ + убрать сериализатор с ним связанный
+        'user': 'api.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticated'],
