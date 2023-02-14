@@ -21,8 +21,8 @@ from django.conf import settings  # FOR: обработка медиафайло
 from django.conf.urls.static import static  # FOR: обработка медиафайлов в режиме отладки
 
 urlpatterns = [
+    path('api/', include('api.urls')),
     path('admin/', admin.site.urls),
-    path('api/', include('api_foodgram.urls')),
     path(
         'redoc/',
         TemplateView.as_view(template_name='redoc.html'),
@@ -31,8 +31,6 @@ urlpatterns = [
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')),
-    # path('api/', include('djoser.urls')),  # Работа с пользователями
-    # path('api/auth/', include('djoser.urls.authtoken')),  # Работа с токенами
 ]
 
 # FOR: обработка медиафайлов в режиме отладки
