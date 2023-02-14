@@ -41,3 +41,23 @@ class User(AbstractUser):
         default='user',
         verbose_name='Уровень доступа'
     )
+    REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
+    USERNAME_FIELD = 'email'
+
+
+class Subscription(models.Model):
+    following_id = models.ForeignKey(  # на кого подписываются
+        User, on_delete=models.CASCADE, related_name='subscriptions_following')
+    user = models.ForeignKey(  # кто подписывается
+        User, on_delete=models.CASCADE, related_name='subscriptions')
+
+    def __str__(self) -> str:
+        return f'{self.user}. {self.following_id}'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['following_id', 'user'],
+                name='unique_following_user'
+            )
+        ]
