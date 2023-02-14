@@ -37,6 +37,15 @@ temp_2/
 .api_foodgram_old1/
 api_foodgram_old1/
 
+/api_foodgram
+./api_foodgram
+.api_foodgram/
+api_foodgram/
+
+
+db_old1.sqlite3
+db_old2.sqlite3
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
