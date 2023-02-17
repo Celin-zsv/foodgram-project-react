@@ -17,7 +17,7 @@ urlpatterns = [
         views.APISubscribePostDelete.as_view()),
     path(
         'users/subscriptions/',
-        views.APISubscriptionsList.as_view()),
+        views.APISubscriptionsList.as_view({'get': 'list'})),
 
     path('', include('djoser.urls')),  # Работа с пользователями
     path('auth/', include('djoser.urls.authtoken')),  # Работа с токенами
