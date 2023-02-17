@@ -12,6 +12,8 @@ from users.models import Subscription, User
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeShortSerializer, RecipesWriteSerializer,
                           SubscriptionSerializer, TagSerializer)
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
 
 
 def zsv_page(request):
@@ -135,13 +137,11 @@ class APISubscribePostDelete(mixins.CreateModelMixin, GenericAPIView):
         )
 
 
-class APISubscriptionsList(mixins.ListModelMixin, GenericAPIView):
-    queryset = User.objects.all()
+class APISubscriptionsList(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SubscriptionSerializer
+    pagination_class = PageNumberPagination
 
-    def get(self, request, *args, **kwargs):
-
-        queryset_user = User.objects.filter(
-            subscriptions_following__user=self.request.user)
-        serializer = self.get_serializer(queryset_user, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = User.objects.filter(
+                subscriptions_following__user=self.request.user)
+        return queryset
