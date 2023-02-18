@@ -14,6 +14,7 @@ from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           SubscriptionSerializer, TagSerializer)
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 def zsv_page(request):
@@ -34,7 +35,13 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 
 class RecipesWriteViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_fields = ('name',)
+
+    def get_queryset(self):
+        if self.request.query_params.get('is_favorited'):
+            return Recipe.objects.filter(favorites__user=self.request.user)
+        return Recipe.objects.all()
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
