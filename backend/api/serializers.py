@@ -8,7 +8,7 @@ from rest_framework import serializers
 from users.models import User
 
 from recipes.models import (
-    Ingredient, IngredientRecipe, Recipe, Tag, TagRecipe)
+    Ingredient, IngredientRecipe, Recipe, Tag, TagRecipe, Favorite)
 from users.models import Subscription
 
 
@@ -96,12 +96,18 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(many=False, read_only=True)
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = (
-            'id', 'tags', 'author',
-            'ingredients',  'name', 'text', 'cooking_time', 'image',)
+            'id', 'tags', 'author', 'ingredients', 'is_favorited', 'name',
+            'text', 'cooking_time', 'image',)
+
+    def get_is_favorited(self, obj):
+        return Favorite.objects.filter(
+            user=self.context.get('request').user,
+            recipe_id=obj).exists()
 
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
