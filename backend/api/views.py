@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, get_object_or_404, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+# from .permissions import IsAuthorOrReadOnlyPermission, ReadOnly
+from rest_framework import permissions
 
 from recipes.models import Favorite, Ingredient, Recipe, Shopping, Tag
 from users.models import Subscription, User
@@ -24,11 +26,13 @@ def zsv_page(request):
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('^name',)
     # search_fields = ('$name',)
@@ -37,11 +41,18 @@ class IngredientViewSet(viewsets.ModelViewSet):
 class RecipesWriteViewSet(viewsets.ModelViewSet):
     # filter_backends = (DjangoFilterBackend,)
     # filterset_fields = ('name',)
+    # filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    # search_fields = ('recipes__name')
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.query_params.get('is_favorited'):
             return Recipe.objects.filter(favorites__user=self.request.user)
         return Recipe.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
