@@ -49,6 +49,8 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.query_params.get('is_favorited'):
             return Recipe.objects.filter(favorites__user=self.request.user)
+        if self.request.query_params.get('is_in_shopping_cart'):
+            return Recipe.objects.filter(shoppings__user=self.request.user)
         return Recipe.objects.all()
 
     def perform_create(self, serializer):
