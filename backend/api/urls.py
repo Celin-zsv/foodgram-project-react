@@ -6,8 +6,8 @@ from api import views
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('tag', views.TagViewSet)
-router.register('ingredient', views.IngredientViewSet)
+router.register('tags', views.TagViewSet)
+router.register('ingredients', views.IngredientViewSet)
 router.register('recipes', views.RecipesWriteViewSet, basename='recipes')
 
 urlpatterns = [
