@@ -1,22 +1,25 @@
-from django.http import HttpResponse
+import io
+
+from django.http import FileResponse, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, get_object_or_404, mixins
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-# from .permissions import IsAuthorOrReadOnlyPermission, ReadOnly
-from rest_framework import permissions
 
-from recipes.models import Favorite, Ingredient, Recipe, Shopping, Tag
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            Shopping, Tag)
 from users.models import Subscription, User
 
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeShortSerializer, RecipesWriteSerializer,
                           SubscriptionSerializer, TagSerializer)
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
-from django_filters.rest_framework import DjangoFilterBackend
 
 
 def zsv_page(request):
@@ -27,6 +30,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -35,14 +39,10 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('^name',)
-    # search_fields = ('$name',)
+    pagination_class = None
 
 
 class RecipesWriteViewSet(viewsets.ModelViewSet):
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_fields = ('name',)
-    # filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    # search_fields = ('recipes__name')
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = PageNumberPagination
 
@@ -113,6 +113,16 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT
             )
 
+    @action(methods=['get'], detail=False)
+    def download_shopping_cart(self, request):
+        recepes = Recipe.objects.filter(
+            shoppings__user=self.request.user)
+        ingredients = Ingredient.objects.filter(
+            recipes__shoppings__user=self.request.user)
+        ingredientrecipes = IngredientRecipe.objects.filter(
+            ingredient_id__in=ingredients, recipe_id__in=recepes)
+        return getpdf(ingredientrecipes)
+
 
 class APISubscribePostDelete(mixins.CreateModelMixin, GenericAPIView):
     queryset = User.objects.all()
@@ -165,3 +175,45 @@ class APISubscriptionsList(mixins.ListModelMixin, viewsets.GenericViewSet):
         queryset = User.objects.filter(
                 subscriptions_following__user=self.request.user)
         return queryset
+
+
+def getpdf(ingredients):
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+    textobj = c.beginText()
+    textobj.setTextOrigin(inch, 1 * inch)
+    pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
+    textobj.setFont('Arial', 12)
+
+    lines = []
+    for ingr in ingredients:
+        if ingr.ingredient_id.name in lines:
+            nam_index = lines.index(ingr.ingredient_id.name)
+            lines[nam_index + 1] = str(int(lines[nam_index + 1]) + ingr.amount)
+        if ingr.ingredient_id.name not in lines:
+            lines.append(f'{ingr.ingredient_id.name}')
+            lines.append(f'{ingr.amount}')
+            lines.append(f'{ingr.ingredient_id.measurement_unit}')
+
+    x = 144
+    y = 14
+    textobj.moveCursor(x, 0)
+    textobj.textOut('Список покупок')
+    textobj.moveCursor(-x, 0)
+    textobj.textLine()
+    textobj.textLine()
+    v_count = 2
+    for line in lines:
+        textobj.textOut(line)
+        if v_count == 0:
+            v_count = 3
+            textobj.moveCursor(-x * 2, y)
+        else:
+            textobj.moveCursor(x, 0)
+        v_count -= 1
+
+    c.drawText(textobj)
+    c.showPage()
+    c.save()
+    buf.seek(0)
+    return FileResponse(buf, as_attachment=True, filename='shopping_list.pdf')
