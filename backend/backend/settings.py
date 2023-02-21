@@ -66,7 +66,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [TEMPLATES_DIR],
-        # 'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -85,7 +84,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# 2023-02-15 11:23
+# FOR ME: for local testing
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -107,11 +106,10 @@ DATABASES = {
 AUTH_USER_MODEL = 'users.User'
 
 DJOSER = {
-    'LOGIN_FIELD': 'email',  # использовать 'email' вместо 'username': для авторизации
+    'LOGIN_FIELD': 'email',  # use 'email' вместо 'username': для авторизации
     'HIDE_USERS': False,  # accessing /users/<id>/ endpoints by user without proper permission will result ACCESS (not err)
     'SERIALIZERS': {
         'current_user': 'api.serializers.CustomUserSerializer',
-        # 'user_create': 'api.serializers.CustomCreateUserSerializer', # НЕ ТРЕБУЕТСЯ + убрать сериализатор с ним связанный
         'user': 'api.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
@@ -173,11 +171,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',  # FOR ME: testing
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
