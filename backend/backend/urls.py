@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 from django.conf import settings  # FOR: обработка медиафайлов в режиме отладки
-from django.conf.urls.static import static  # FOR: обработка медиафайлов в режиме отладки
+from django.conf.urls.static import static  # FOR: обр-ка меди в режиме отладки
 
 urlpatterns = [
     path('api/', include('api.urls')),
