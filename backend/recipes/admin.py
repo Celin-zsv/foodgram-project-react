@@ -11,7 +11,11 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe_id', 'user')
 
 
-admin.site.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'measurement_unit')
+
+
+admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(IngredientRecipe)
