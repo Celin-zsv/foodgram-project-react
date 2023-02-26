@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-# from api_foodgram.serializers import CustomUserSerializer
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,8 +108,8 @@ DJOSER = {
     'LOGIN_FIELD': 'email',  # use 'email' вместо 'username': для авторизации
     'HIDE_USERS': False,  # accessing /users/<id>/ endpoints by user without proper permission will result ACCESS (not err)
     'SERIALIZERS': {
-        'current_user': 'api.serializers.CustomUserSerializer',
-        'user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+        'user': 'api.serializers.UserSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticated'],
@@ -180,3 +179,5 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
+
+MAX_LENGTH_NAME = 200
