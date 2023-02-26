@@ -1,14 +1,10 @@
-import base64
-
-from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            Shopping, Tag)
 from users.models import User
-
-from recipes.models import (
-    Ingredient, IngredientRecipe, Recipe, Tag, TagRecipe, Favorite, Shopping)
-from users.models import Subscription
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -34,31 +30,17 @@ class IngredientRecipeWriteSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeReadSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='ingredient_id')
-    measurement_unit = serializers.SerializerMethodField()
-    id = serializers.SerializerMethodField()
+    name = serializers.CharField(source='ingredient.name')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit')
+    id = serializers.CharField(source='ingredient.id')
 
     class Meta:
         model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount',)
 
-    def get_measurement_unit(self, obj):
-        return obj.ingredient_id.measurement_unit
 
-    def get_id(self, obj):
-        return obj.ingredient_id.id
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -68,19 +50,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        if not self.context:
-            return User.objects.filter(
-                subscriptions_following__following_id=obj).exists()
-        return Subscription.objects.filter(
-            user=self.context.get('request').user,
-            following_id=obj).exists()
+        return User.objects.filter(
+            subscriptions_following__following=obj).exists()
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeReadSerializer(many=True, read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
     tags = TagSerializer(many=True, read_only=True)
-    author = CustomUserSerializer(many=False, read_only=True)
+    author = UserSerializer(many=False, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -93,18 +71,17 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         return Favorite.objects.filter(
             user=self.context.get('request').user,
-            recipe_id=obj).exists()
+            recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         return Shopping.objects.filter(
             user=self.context.get('request').user,
-            recipe_id=obj).exists()
+            recipe=obj).exists()
 
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
-    ingredients = serializers.CharField(source='ingredients_ref')
     ingredients = IngredientRecipeWriteSerializer(
-        many=True, required=True, allow_empty=False)
+        many=True, allow_empty=False)
     image = Base64ImageField(required=False, allow_null=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, allow_empty=False)
@@ -116,33 +93,28 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time', 'ingredients', 'tags', 'image',)
         read_only_fields = ('author',)
 
+    @staticmethod
+    def set_ingredients(recipe, ingredient, ingr_list):
+        ingr_list.append(
+            IngredientRecipe(
+                recipe=recipe,
+                ingredient=get_object_or_404(
+                    Ingredient, pk=ingredient['id']),
+                amount=ingredient['amount']
+            )
+        )
+        return ingr_list
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
 
-        bulk_list = list()
+        ingr_list = list()
         for ingredient in ingredients:
-            bulk_list.append(
-                IngredientRecipe(
-                    recipe_id=recipe,
-                    ingredient_id=get_object_or_404(
-                        Ingredient, pk=ingredient['id']),
-                    amount=ingredient['amount']
-                )
-            )
-        IngredientRecipe.objects.bulk_create(bulk_list)
-
-        bulk_list = list()
-        for tag in tags:
-            bulk_list.append(
-                TagRecipe(
-                    recipe_id=recipe,
-                    tag_id=get_object_or_404(
-                        Tag, pk=tag.id)
-                )
-            )
-        TagRecipe.objects.bulk_create(bulk_list)
+            self.set_ingredients(recipe, ingredient, ingr_list)
+        IngredientRecipe.objects.bulk_create(ingr_list)
+        recipe.tags.set(tags)
 
         return recipe
 
@@ -153,60 +125,32 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time', instance.text)
         instance.image = validated_data.get('image', instance.image)
         instance.id = validated_data.get('id', instance.id)
+        instance.author = self.context['request'].user
 
         if 'ingredients' in validated_data:
             ingredients = validated_data.pop('ingredients')
             obj_for_del = IngredientRecipe.objects.filter(
-                recipe_id=instance.id)
-            bulk_list = list()
+                recipe=instance.id)
+            ingr_list = list()
             for ingredient in ingredients:
                 ingredientrecipe_exist = IngredientRecipe.objects.filter(
-                    recipe_id=instance.id,
-                    ingredient_id=ingredient['id']).exists()
+                    recipe=instance.id,
+                    ingredient=ingredient['id']).exists()
                 if ingredientrecipe_exist:
                     obj_for_del = obj_for_del.exclude(
-                        ingredient_id=ingredient['id'])
+                        ingredient=ingredient['id'])
                     obj_ingredientrecipe = IngredientRecipe.objects.get(
-                        recipe_id=instance.id, ingredient_id=ingredient['id'])
+                        recipe=instance.id, ingredient=ingredient['id'])
                     obj_ingredientrecipe.amount = ingredient['amount']
                     obj_ingredientrecipe.save()
                 elif not ingredientrecipe_exist:
-                    bulk_list.append(
-                        IngredientRecipe(
-                            recipe_id=instance,
-                            ingredient_id=get_object_or_404(
-                                Ingredient, pk=ingredient['id']),
-                            amount=ingredient['amount']
-                        )
-                    )
+                    self.set_ingredients(instance, ingredient, ingr_list)
             obj_for_del.delete()
-            IngredientRecipe.objects.bulk_create(bulk_list)
+            IngredientRecipe.objects.bulk_create(ingr_list)
 
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-            obj_for_del = TagRecipe.objects.filter(
-                recipe_id=instance.id)
-            bulk_list = list()
-            for tag in tags:
-                tagrecipe_exist = TagRecipe.objects.filter(
-                    recipe_id=instance.id,
-                    tag_id=tag.id).exists()
-                if tagrecipe_exist:
-                    obj_for_del = obj_for_del.exclude(
-                        tag_id=tag.id)
-                    obj_tagrecipe = TagRecipe.objects.get(
-                        recipe_id=instance.id, tag_id=tag.id)
-                    obj_tagrecipe.save()
-                elif not tagrecipe_exist:
-                    bulk_list.append(
-                        TagRecipe(
-                            recipe_id=instance,
-                            tag_id=get_object_or_404(
-                                Tag, pk=tag.id)
-                        )
-                    )
-            obj_for_del.delete()
-            TagRecipe.objects.bulk_create(bulk_list)
+            instance.tags.set(tags)
 
         instance.save()
         return instance
@@ -222,7 +166,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
 class RecipeReadShortSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeWriteSerializer(many=True, read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
-    author = CustomUserSerializer(many=False, read_only=True)
+    author = UserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Recipe
@@ -240,7 +184,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
             'id', 'name', 'image', 'cooking_time',)
 
 
-class SubscriptionSerializer(CustomUserSerializer):
+class SubscriptionSerializer(UserSerializer):
     recipes = RecipeShortSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
