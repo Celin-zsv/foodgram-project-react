@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             Shopping, Tag)
-from users.models import User
+from users.models import User, Subscription
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -50,8 +50,11 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        return User.objects.filter(
-            subscriptions_following__following=obj).exists()
+        if User.objects.filter(pk=self.context.get('request').user.id):
+            return Subscription.objects.filter(
+                user=self.context.get('request').user,
+                following=obj).exists()
+        return False
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -69,14 +72,18 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'is_in_shopping_cart', 'name', 'text', 'cooking_time', 'image',)
 
     def get_is_favorited(self, obj):
-        return Favorite.objects.filter(
-            user=self.context.get('request').user,
-            recipe=obj).exists()
+        if User.objects.filter(pk=self.context.get('request').user.id):
+            return Favorite.objects.filter(
+                user=self.context.get('request').user,
+                recipe=obj).exists()
+        return False
 
     def get_is_in_shopping_cart(self, obj):
-        return Shopping.objects.filter(
-            user=self.context.get('request').user,
-            recipe=obj).exists()
+        if User.objects.filter(pk=self.context.get('request').user.id):
+            return Shopping.objects.filter(
+                user=self.context.get('request').user,
+                recipe=obj).exists()
+        return False
 
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
@@ -94,8 +101,8 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
         read_only_fields = ('author',)
 
     @staticmethod
-    def set_ingredients(recipe, ingredient, ingr_list):
-        ingr_list.append(
+    def set_ingredients(recipe, ingredient, ingredients_list):
+        ingredients_list.append(
             IngredientRecipe(
                 recipe=recipe,
                 ingredient=get_object_or_404(
@@ -103,7 +110,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             )
         )
-        return ingr_list
+        return ingredients_list
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
