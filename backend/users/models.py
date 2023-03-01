@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 
 class User(AbstractUser):
@@ -12,17 +13,12 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=settings.MAX_LENGTH_NAME,
         unique=True,
-        validators=[RegexValidator(
-            regex='^[a-zA-ZА-Яа-я0-9_@+.-]{2,200}$',
-            message=(
-                'Username must be Alphanumeric: Latin /Rus leters, '
-                'numbers, allowed _ @ + . - symbols, '
-                'min 2 and max 200 symbols'),
-            code='invalid_username'),
+        validators=[
+            UnicodeUsernameValidator(),
             RegexValidator(
-                regex='[^me]',
-                message=('Is not allowed username "me"'),
-                code='invalid_username me')],
+                regex='[^(me)|(Me)|(ME)|(mE)]',
+                message=('Is not allowed username "me" case-insensitive'),
+                code='invalid_username')],
         verbose_name='Имя пользователя'
     )
     first_name = models.CharField(
@@ -36,7 +32,7 @@ class User(AbstractUser):
         default='not known last_name'
     )
     password = models.CharField(
-        max_length=150,
+        max_length=settings.MAX_LENGTH_NAME,
         validators=[MinLengthValidator(5)],
         verbose_name='Пароль'
     )
