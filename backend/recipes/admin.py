@@ -6,6 +6,9 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'text', 'cooking_time')
+    search_fields = ('name', 'author', 'tags')
+    list_filter = ('name', 'author', 'tags', 'pub_date')
+    filter_vertical = ('tags',)
 
 
 class FavoriteAdmin(admin.ModelAdmin):
