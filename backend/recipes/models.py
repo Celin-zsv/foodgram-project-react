@@ -20,7 +20,7 @@ class Tag(models.Model):
         'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True)
     color = models.CharField(
         'Цвет в HEX', max_length=7, null=False,
-        validators=[RegexValidator('^#([A-Fa-f0-9]{6})$', message=(
+        validators=[RegexValidator('^#([A-Fa-f0-9]{3,6})$', message=(
             'Ошибка ввода Hex'))])
     slug = models.SlugField('Слаг', max_length=200, null=True)
 
@@ -68,7 +68,7 @@ class IngredientRecipe(models.Model):
         Ingredient, on_delete=models.CASCADE, related_name='+')
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='ingredients')
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         'Количество в рецепте', validators=[MinValueValidator(1)])
 
     def __str__(self) -> str:
