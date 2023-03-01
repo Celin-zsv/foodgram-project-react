@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, get_object_or_404, mixins
 from rest_framework.pagination import PageNumberPagination
@@ -10,6 +10,8 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             Shopping, Tag)
 from users.models import Subscription, User
 
+from .filters import RecipeFilter
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeShortSerializer, RecipesWriteSerializer,
                           SubscriptionSerializer, TagSerializer)
@@ -23,36 +25,25 @@ def zsv_page(request):
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('^name',)
     pagination_class = None
 
 
 class RecipesWriteViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = Recipe.objects.all()
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = PageNumberPagination
-
-    def get_queryset(self):
-        if self.request.query_params.get('is_favorited'):
-            return Recipe.objects.filter(
-                id__in=Favorite.objects.filter(
-                    user=self.request.user).values_list('recipe', flat=True)
-                    )
-
-        if self.request.query_params.get('is_in_shopping_cart'):
-            return Recipe.objects.filter(
-                id__in=Shopping.objects.filter(
-                    user=self.request.user).values_list('recipe', flat=True)
-                    )
-        return Recipe.objects.all()
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
