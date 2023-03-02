@@ -110,8 +110,7 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
         ingredientrecipes = IngredientRecipe.objects.filter(
             recipe__in=Recipe.objects.filter(
                 id__in=Shopping.objects.filter(
-                    user=self.request.user).values_list('recipe', flat=True)
-                    ))
+                    user=self.request.user).values_list('recipe', flat=True)))
         return getpdf(ingredientrecipes)
 
 
@@ -164,5 +163,5 @@ class APISubscriptionsList(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         queryset = User.objects.filter(
-                subscriptions_following__user=self.request.user)
+            subscriptions_following__user=self.request.user)
         return queryset

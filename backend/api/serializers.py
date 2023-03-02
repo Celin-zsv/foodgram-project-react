@@ -52,8 +52,8 @@ class UserSerializer(serializers.ModelSerializer):
         if self.context:
             user = self.context.get('request').user
             return (
-                user.is_authenticated and
-                user.subscriptions.filter(following=obj).exists())
+                user.is_authenticated
+                and user.subscriptions.filter(following=obj).exists())
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -73,14 +73,14 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
         return (
-            user.is_authenticated and
-            user.favorites.filter(recipe=obj).exists())
+            user.is_authenticated
+            and user.favorites.filter(recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         return (
-            user.is_authenticated and
-            user.shoppings.filter(recipe=obj).exists())
+            user.is_authenticated
+            and user.shoppings.filter(recipe=obj).exists())
 
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
@@ -176,7 +176,7 @@ class RecipeReadShortSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id', 'tags', 'author',
-            'ingredients',  'name', 'text', 'cooking_time', 'image',)
+            'ingredients', 'name', 'text', 'cooking_time', 'image',)
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

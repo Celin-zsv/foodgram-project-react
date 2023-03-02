@@ -150,7 +150,7 @@ dmypy.json
 # .idea
 .idea
 
-migrations/
-.migrations/
-backend/api/migrations
-backend/users/migrations
+# папки со статикой и медиа
+static/
+posts/static/
+media/
