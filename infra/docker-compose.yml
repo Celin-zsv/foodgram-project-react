@@ -10,7 +10,8 @@ services:
       - ./.env
 
   web:
-    build: ../backend/
+    # image: zelenkovskii/backend:latest  # FOR ME: for remote container
+    build: ../backend/  # FOR ME: for local container
     restart: always
     volumes: 
       - static_value:/app/static/
@@ -22,9 +23,10 @@ services:
 
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    # image: zelenkovskii/frontend_final:latest # FOR ME: for remote container
+    build:  # FOR ME: for local container
+      context: ../frontend  # FOR ME: for local container
+      dockerfile: Dockerfile  # FOR ME: for local container
     volumes:
       - ../frontend/:/app/result_build/
 
