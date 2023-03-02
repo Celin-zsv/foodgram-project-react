@@ -1,7 +1,6 @@
 version: '3.3'
 services:
 
-
   db:
     image: postgres:13.0-alpine
     volumes:
@@ -14,13 +13,12 @@ services:
     build: ../backend/  # FOR ME: for local container
     restart: always
     volumes: 
-      - static_value:/app/static/
-      - media_value:/app/media/
+      - static_value:/app/foodgram/static/
+      - media_value:/app/foodgram/media/
     depends_on:
       - db
     env_file:
       - ./.env
-
 
   frontend:
     # image: zelenkovskii/frontend_final:latest # FOR ME: for remote container
@@ -28,8 +26,7 @@ services:
       context: ../frontend  # FOR ME: for local container
       dockerfile: Dockerfile  # FOR ME: for local container
     volumes:
-      - ../frontend/:/app/result_build/
-
+      - ../frontend/:/app/foodgram/result_build/
 
   nginx:
     image: nginx:1.19.3
