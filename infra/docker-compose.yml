@@ -9,8 +9,8 @@ services:
       - ./.env
 
   web:
-    # image: zelenkovskii/backend:latest  # FOR ME: for remote container
-    build: ../backend/  # FOR ME: for local container
+    image: zelenkovskii/backend:latest  # FOR ME: for remote container
+    # build: ../backend/  # FOR ME: for local container
     restart: always
     volumes: 
       - static_value:/app/foodgram/static/
@@ -21,10 +21,10 @@ services:
       - ./.env
 
   frontend:
-    # image: zelenkovskii/frontend_final:latest # FOR ME: for remote container
-    build:  # FOR ME: for local container
-      context: ../frontend  # FOR ME: for local container
-      dockerfile: Dockerfile  # FOR ME: for local container
+    image: zelenkovskii/frontend_final:latest # FOR ME: for remote container
+    # build:  # FOR ME: for local container
+    #   context: ../frontend  # FOR ME: for local container
+    #   dockerfile: Dockerfile  # FOR ME: for local container
     volumes:
       - ../frontend/:/app/foodgram/result_build/
 
