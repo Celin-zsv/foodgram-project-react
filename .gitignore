@@ -150,5 +150,7 @@ dmypy.json
 # .idea
 .idea
 
-./backend/users/migrations/
-./backend/recipes/migrations/
+backend/backend/users/migrations/
+backend/backend/recipes/migrations/
+migrations/
+.migrations/
