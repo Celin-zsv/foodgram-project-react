@@ -54,6 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
             return (
                 user.is_authenticated
                 and user.subscriptions.filter(following=obj).exists())
+        return False
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):

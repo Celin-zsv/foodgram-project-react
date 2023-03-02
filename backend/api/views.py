@@ -68,15 +68,14 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
             serializer = RecipeShortSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if request.method == 'DELETE':  # Explicit is better than implicit
-            if not favorite_exist.exists():
-                return Response(
-                    {'errors': 'Ошибка удаления: подписка не существует'},
-                    status=status.HTTP_400_BAD_REQUEST)
-            favorite_exist.delete()
+        if not favorite_exist.exists():  # request.method == 'DELETE'
             return Response(
-                'Рецепт успешно удален из избранного',
-                status=status.HTTP_204_NO_CONTENT)
+                {'errors': 'Ошибка удаления: подписка не существует'},
+                status=status.HTTP_400_BAD_REQUEST)
+        favorite_exist.delete()
+        return Response(
+            'Рецепт успешно удален из избранного',
+            status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post', 'delete'], detail=True)
     def shopping_cart(self, request, pk=None):
@@ -93,17 +92,15 @@ class RecipesWriteViewSet(viewsets.ModelViewSet):
             serializer = RecipeShortSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if request.method == 'DELETE':   # Explicit is better than implicit
-            if not shopping_exist.exists():
-                return Response(
-                    {'error': 'Ошибка удаления: покупка не существует'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            shopping_exist.delete()
+        if not shopping_exist.exists():  # request.method == 'DELETE'
             return Response(
-                'Рецепт успешно удален из списка покупок',
-                status=status.HTTP_204_NO_CONTENT
+                {'error': 'Ошибка удаления: покупка не существует'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+        shopping_exist.delete()
+        return Response(
+            'Рецепт успешно удален из списка покупок',
+            status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=False)
     def download_shopping_cart(self, request):
@@ -162,6 +159,5 @@ class APISubscriptionsList(mixins.ListModelMixin, viewsets.GenericViewSet):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        queryset = User.objects.filter(
+        return User.objects.filter(
             subscriptions_following__user=self.request.user)
-        return queryset
