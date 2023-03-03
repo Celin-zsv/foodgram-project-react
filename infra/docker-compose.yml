@@ -12,7 +12,7 @@ services:
     image: zelenkovskii/backend:latest  # FOR ME: for remote container
     # build: ../backend/  # FOR ME: for local container
     restart: always
-    volumes: 
+    volumes:
       - static_value:/app/foodgram/static/
       - media_value:/app/foodgram/media/
     depends_on:
@@ -21,7 +21,7 @@ services:
       - ./.env
 
   frontend:
-    image: zelenkovskii/frontend_final:latest # FOR ME: for remote container
+    image: zelenkovskii/frontend:latest # FOR ME: for remote container
     # build:  # FOR ME: for local container
     #   context: ../frontend  # FOR ME: for local container
     #   dockerfile: Dockerfile  # FOR ME: for local container
