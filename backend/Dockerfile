@@ -1,7 +1,8 @@
 # FOR ME: создать образ на основе базового слоя python (там будет ОС и интерпретатор Python)
 FROM python:3.7-slim
 # FOR ME: создать директорию (в контейнере) + сделать директорию /app <рабочей директорией>
-WORKDIR /app/foodgram
+# WORKDIR /app/foodgram  # 2023/03/03 22:05
+WORKDIR /app
 # FOR ME: копировать (с локала) в <рабочую директорию /app >
 COPY requirements.txt .
 # FOR ME: выполнить <в контейнере>
