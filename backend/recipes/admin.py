@@ -1,11 +1,21 @@
+from django import forms
 from django.contrib import admin
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             Shopping, Tag)
 
 
+class RequiredFormSet(forms.models.BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(RequiredFormSet, self).__init__(*args, **kwargs)
+        self.forms[0].empty_permitted = False
+
+
 class IngredientRecipeAdmin(admin.TabularInline):
     model = IngredientRecipe
     list_display = ('id', 'ingredient', 'recipe', 'amount')
+    extra = 1
+    show_change_link = True
+    formset = RequiredFormSet
 
 
 class RecipeAdmin(admin.ModelAdmin):
