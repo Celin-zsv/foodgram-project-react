@@ -13,9 +13,10 @@ class RequiredFormSet(forms.models.BaseInlineFormSet):
 class IngredientRecipeAdmin(admin.TabularInline):
     model = IngredientRecipe
     list_display = ('id', 'ingredient', 'recipe', 'amount')
-    extra = 1
+    extra = 3
     show_change_link = True
     formset = RequiredFormSet
+    max_num = 33
 
 
 class RecipeAdmin(admin.ModelAdmin):
