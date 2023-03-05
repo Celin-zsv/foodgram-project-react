@@ -40,6 +40,5 @@ class IngredientAdmin(admin.ModelAdmin):
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(IngredientRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(Shopping)
