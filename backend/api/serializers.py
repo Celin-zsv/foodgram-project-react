@@ -97,6 +97,19 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time', 'ingredients', 'tags', 'image',)
         read_only_fields = ('author',)
 
+    def validate(self, data):
+        ingredients_double = []
+        if self.context['request'].method in ('POST', 'PATCH'):
+            for ingredient in self.initial_data['ingredients']:
+                if ingredient['id'] not in ingredients_double:
+                    ingredients_double.append(ingredient['id'])
+                else:
+                    v_name = get_object_or_404(Ingredient, pk=ingredient['id'])
+                    raise serializers.ValidationError(
+                        f'Дубль инградиента <{v_name}> запрещен!')
+            return data
+        return data
+
     @staticmethod
     def set_ingredients(recipe, ingredient, ingredients_list):
         ingredients_list.append(
