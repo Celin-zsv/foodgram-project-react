@@ -6,7 +6,11 @@ from users.models import User
 
 class Ingredient(models.Model):
     name = models.CharField(
-        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True)
+        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True,
+        validators=[
+            RegexValidator(
+                regex='^[^$%^&#:;!]+$',
+                message=('В наименовании запрещены символы: $%^&#:;!'))],)
     measurement_unit = models.CharField(
         'Единица измерения', max_length=settings.MAX_LENGTH_NAME)
 
@@ -16,7 +20,11 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True)
+        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True,
+        validators=[
+            RegexValidator(
+                regex='^[^$%^&#:;!]+$',
+                message=('В наименовании запрещены символы: $%^&#:;!'))],)
     color = models.CharField(
         'Цвет в HEX', max_length=7, null=False,
         validators=[RegexValidator('^#([A-Fa-f0-9]{3,6})$', message=(
@@ -35,7 +43,11 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(
-        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True)
+        'Наименование', max_length=settings.MAX_LENGTH_NAME, db_index=True,
+        validators=[
+            RegexValidator(
+                regex='^[^$%^&#:;!]+$',
+                message=('В наименовании запрещены символы: $%^&#:;!'))],)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
