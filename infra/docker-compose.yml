@@ -13,8 +13,6 @@ services:
     # build: ../backend/  # FOR ME: for local container
     restart: always
     volumes:
-      # - static_value:/app/foodgram/static/  # 2023/03/03 22:05
-      # - media_value:/app/foodgram/media/  # 2023/03/03 22:05
       - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
@@ -28,7 +26,6 @@ services:
     #   context: ../frontend  # FOR ME: for local container
     #   dockerfile: Dockerfile  # FOR ME: for local container
     volumes:
-      # - ../frontend/:/app/foodgram/result_build/  # 2023/03/03 22:05
       - ../frontend/:/app/result_build/
 
   nginx:
