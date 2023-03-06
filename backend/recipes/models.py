@@ -14,7 +14,7 @@ class Ingredient(models.Model):
                     'В наименовании разрешены: A-Z a-z A-Я a-я пробел')),
             RegexValidator(
                 regex='^[^_|^{}`~\\/()[]+$',
-                message=('В наименовании запрещены: _^|^{}`~\\/()['))],)
+                message=('В наименовании запрещены: _|^{}`~\\/()['))],)
     measurement_unit = models.CharField(
         'Единица измерения', max_length=settings.MAX_LENGTH_NAME)
 
@@ -32,7 +32,7 @@ class Tag(models.Model):
                     'В наименовании разрешены: A-Z a-z A-Я a-я пробел')),
             RegexValidator(
                 regex='^[^_|^{}`~\\/()[]+$',
-                message=('В наименовании запрещены: _^|^{}`~\\/()['))],)
+                message=('В наименовании запрещены: _|^{}`~\\/()['))],)
     color = models.CharField(
         'Цвет в HEX', max_length=7, null=False,
         validators=[RegexValidator('^#([A-Fa-f0-9]{3,6})$', message=(
@@ -59,7 +59,7 @@ class Recipe(models.Model):
                     'В наименовании разрешены: A-Z a-z A-Я a-я пробел')),
             RegexValidator(
                 regex='^[^_|^{}`~\\/()[]+$',
-                message=('В наименовании запрещены: _^|^{}`~\\/()['))],)
+                message=('В наименовании запрещены: _|^{}`~\\/()['))],)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
