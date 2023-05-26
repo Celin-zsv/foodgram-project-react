@@ -7,7 +7,8 @@ WORKDIR /app
 COPY requirements.txt .
 # apt-get install -y pkg-config
 # apt install pkg-config
-RUN apt install pkg-config
+# RUN apt install pkg-config
+RUN install pkg-config
 # FOR ME: выполнить <в контейнере>
 RUN pip3 install -r ./requirements.txt --no-cache-dir
 # FOR ME: копировать (с локала) директорию /backend в директорию /app
